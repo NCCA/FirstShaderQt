@@ -191,7 +191,7 @@ void OpenGLWindow::render()
   // clear the screen and depth buffer
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   // set the first attrib (1) to 1,0,0 red
-  glVertexAttrib3f(1,1,0,1);
+  glVertexAttrib3f(1,1,0,0);
   glBindVertexArray(m_vaoID);		// select first bind the array
   glDrawArrays(GL_TRIANGLES, 0, 6);	// draw object
   // finally swap the buffers to make visible

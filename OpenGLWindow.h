@@ -1,7 +1,5 @@
 #ifndef OPENGLWINDOW_H__
 #define OPENGLWINDOW_H__
-#include <QtGui/QWindow>
-#include <QKeyEvent>
 
 #if defined (LINUX) || defined (WIN32)
   #include <GL/gl.h>
@@ -13,6 +11,8 @@
   #include <OpenGL/glu.h>
 #endif
 
+#include <QtGui/QWindow>
+#include <QKeyEvent>
 
 
 //----------------------------------------------------------------------------------------------------------------------

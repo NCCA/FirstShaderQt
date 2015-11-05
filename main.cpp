@@ -20,8 +20,8 @@ int main(int argc, char **argv)
   #if defined( DARWIN)
     // at present mac osx Mountain Lion only supports GL3.2
     // the new mavericks will have GL 4.x so can change
-    format.setMajorVersion(3);
-    format.setMinorVersion(2);
+    format.setMajorVersion(4);
+    format.setMinorVersion(1);
   #else
     // with luck we have the latest GL version so set to this
     format.setMajorVersion(4);
@@ -31,10 +31,9 @@ int main(int argc, char **argv)
   format.setProfile(QSurfaceFormat::CoreProfile);
   // now set the depth buffer to 24 bits
   format.setDepthBufferSize(24);
+  QSurfaceFormat::setDefaultFormat(format);
   // now we are going to create our scene window
   OpenGLWindow window;
-  // and set the OpenGL format
-  window.setFormat(format);
   // set the window size
   window.resize(1024, 720);
   // and finally show

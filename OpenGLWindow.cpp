@@ -4,10 +4,7 @@
  * adapted to use NGL
  */
 #include "OpenGLWindow.h"
-#include <QtCore/QCoreApplication>
-#include <QtGui/QOpenGLContext>
-#include <QtGui/QOpenGLPaintDevice>
-#include <QtGui/QPainter>
+#include <QKeyEvent>
 #include <QApplication>
 #include <iostream>
 
@@ -73,41 +70,47 @@ void OpenGLWindow::createShader()
  // here we create a program
  m_shaderID=glCreateProgram();
  // some raw data for our vertex shader
- const char *vertex[]={
-                 "#version 400 core \n"
+ const std::string vertex =
+ R"DELIM(
+          #version 400 core
 
-                 "layout (location = 0) in vec3  inPosition; \n"
-                 "layout (location = 1) in vec3 inColour; \n"
-                 "out vec3 vertColour; \n"
-                 "void main() \n"
-                 "{ \n"
-                 "   gl_Position = vec4(inPosition, 1.0); \n"
-                 "   if (inPosition.x >0.0 && inPosition.y<0.5) \n"
-                 "    vertColour = inColour; \n"
-                 "   else vertColour=vec3(1,1,1); \n"
-                 "} \0"};
+          layout (location = 0) in vec3  inPosition;
+          layout (location = 1) in vec3 inColour;
+          out vec3 vertColour;
+          void main()
+          {
+             gl_Position = vec4(inPosition, 1.0);
+             if (inPosition.x >0.0 && inPosition.y<0.5)
+              vertColour = inColour;
+             else vertColour=vec3(1,1,1);
+          }
+  )DELIM";
   // create a Vertex shader object
   GLuint vertexID=glCreateShader(GL_VERTEX_SHADER);
-  // attatch the shader source
-  glShaderSource(vertexID,1,&vertex[0],NULL);
+  // attatch the shader source we need to convert to GL format
+  const char* source=vertex.c_str();
+  glShaderSource(vertexID,1,&source,NULL);
   // now compile the shader
   glCompileShader(vertexID);
   std::cerr<<"compiling vertex shader\n";
   printInfoLog(vertexID);
 
   // some source for our fragment shader
-  const char *fragment[]={
-                  "#version 400 core \n"
-                  "in vec3 vertColour; \n"
-                  "out vec4 fragColour; \n"
-                  "void main() \n"
-                  "{ \n"
-                  "fragColour = vec4(vertColour,1.0); \n"
-                  "} \0"};
-  // now create a fragment shader
+  const std::string fragment =
+  R"DELIM(
+          #version 400 core
+          in vec3 vertColour;
+          out vec4 fragColour;
+          void main()
+          {
+            fragColour = vec4(vertColour,1.0);
+          }
+  )DELIM";
+// now create a fragment shader
   GLuint fragmentID=glCreateShader(GL_FRAGMENT_SHADER);
   // attatch the shader source
-  glShaderSource(fragmentID,1,&fragment[0],NULL);
+  source=fragment.c_str();
+  glShaderSource(fragmentID,1,&source,NULL);
   // compile the shader
   std::cerr<<"compiling frag shader shader\n";
   glCompileShader(fragmentID);
@@ -127,28 +130,20 @@ void OpenGLWindow::createShader()
   glDeleteShader(fragmentID);
 }
 
-OpenGLWindow::OpenGLWindow(QWindow *_parent)
-    : QWindow(_parent)
-    , m_context(0)
-    , m_device(0)
+OpenGLWindow::OpenGLWindow()
 {
-  // ensure we render to OpenGL and not a QPainter by setting the surface type
-  setSurfaceType(QWindow::OpenGLSurface);
-
   setTitle("First Shaders in OpenGL 3.2");
 
 }
 
 OpenGLWindow::~OpenGLWindow()
 {
-  // now we have finished clear the device
-  delete m_device;
   glDeleteProgram(m_shaderID);
 }
 
 
 
-void OpenGLWindow::initialize()
+void OpenGLWindow::initializeGL()
 {
   glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
 
@@ -161,43 +156,22 @@ void OpenGLWindow::initialize()
 }
 
 
-void OpenGLWindow::exposeEvent(QExposeEvent *event)
+void OpenGLWindow::paintGL()
 {
-  // don't use the event
-  Q_UNUSED(event);
-  // if the window is exposed (visible) render
-  if (isExposed())
-  {
-    render();
-  }
-}
-
-
-void OpenGLWindow::render()
-{
-  // if this is the first time round init the GL context this will only be called once
-  if (!m_context)
-  {
-
-    m_context = new QOpenGLContext(this);
-    m_context->setFormat(requestedFormat());
-    m_context->create();
-    m_context->makeCurrent(this);
-    // now call the int method in our child class to do all the one time GL init stuff
-    initialize();
-  }
-
-  m_context->makeCurrent(this);
-  // clear the screen and depth buffer
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   // set the first attrib (1) to 1,0,0 red
-  glVertexAttrib3f(1,1,0,0);
+  //glVertexAttrib3f(1,1,0,0);
   glBindVertexArray(m_vaoID);		// select first bind the array
   glDrawArrays(GL_TRIANGLES, 0, 6);	// draw object
-  // finally swap the buffers to make visible
-  m_context->swapBuffers(this);
 }
 
+void OpenGLWindow::resizeGL(QResizeEvent *_event)
+{
+}
+
+void OpenGLWindow::resizeGL(int _w , int _h)
+{
+}
 
 void OpenGLWindow::keyPressEvent(QKeyEvent *_event)
 {
@@ -206,7 +180,9 @@ void OpenGLWindow::keyPressEvent(QKeyEvent *_event)
    case Qt::Key_Escape : QApplication::exit(EXIT_SUCCESS); break;
    case Qt::Key_W : glPolygonMode(GL_FRONT_AND_BACK,GL_LINE); break;
    case Qt::Key_S : glPolygonMode(GL_FRONT_AND_BACK,GL_FILL); break;
-
+   case Qt::Key_1 : glVertexAttrib3f(1,1,0,0); break;
+   case Qt::Key_2 : glVertexAttrib3f(1,0,1,0); break;
+   case Qt::Key_3 : glVertexAttrib3f(1,0,0,1); break;
   }
-  render();
+  update();
 }

@@ -14,7 +14,7 @@ SOURCES+= main.cpp \
 					OpenGLWindow.cpp
 
 HEADERS+= OpenGLWindow.h
-
+CONFIG+=c++11
 INCLUDEPATH +=./
 
 DESTDIR=./

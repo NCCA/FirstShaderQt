@@ -51,9 +51,10 @@ void OpenGLWindow::createQuad()
   // now bind a vertex array object for our verts
   glBindVertexArray(m_vaoID);
   // now we are going to bind this to our vbo
-  glGenBuffers(1, &m_vboID);
+  GLuint vboID;
+  glGenBuffers(1, &vboID);
   // now bind this to the VBO buffer
-  glBindBuffer(GL_ARRAY_BUFFER, m_vboID);
+  glBindBuffer(GL_ARRAY_BUFFER, vboID);
   // allocate the buffer datra
   glBufferData(GL_ARRAY_BUFFER, 18*sizeof(GLfloat), vert, GL_STATIC_DRAW);
   // now fix this to the attribute buffer 0
